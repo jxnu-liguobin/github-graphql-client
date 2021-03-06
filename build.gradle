@@ -3,7 +3,8 @@ import io.github.kobylynskyi.graphql.codegen.gradle.GraphQLCodegenGradleTask
 
 plugins {
     id 'java'
-    id "org.jetbrains.kotlin.jvm" version "1.3.71"
+    id 'scala'
+    id "org.jetbrains.kotlin.jvm" version "1.4.31"
     id "io.github.kobylynskyi.graphql.codegen" version "4.1.4"
 }
 
@@ -13,18 +14,18 @@ version '0.1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 sourceSets {
-    main.kotlin.srcDirs += "src/main/graphql"
+    main.kotlin.srcDirs += "src/main/kotlin-graphql"
+    main.scala.srcDirs += "src/main/scala-graphql"
+    main.java.srcDirs += "src/main/java-graphql"
 }
 
-repositories {
-    maven {
-        url 'https://repo.gradle.org/gradle/libs-releases-local'
+allprojects {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
+        mavenLocal()
+        mavenCentral()
     }
-    mavenCentral()
-    mavenLocal()
-    jcenter()
 }
-
 
 dependencies {
     implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.4"
@@ -32,11 +33,14 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.2.2"
     implementation "com.fasterxml.jackson.core:jackson-core:2.12.0"
     implementation "com.fasterxml.jackson.core:jackson-databind:2.12.0"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0"
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.12.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
+
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31"
+
+    implementation "org.scala-lang:scala-library:2.13.5"
+    implementation "com.fasterxml.jackson.module:jackson-module-scala_2.13:2.12.2"
+
 }
 
 /**
@@ -45,7 +49,29 @@ dependencies {
 compileKotlin.dependsOn "graphqlCodegenKotlinService"
 task graphqlCodegenKotlinService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
-    outputDir = new File("src/main/graphql")
+    outputDir = new File("src/main/kotlin-graphql")
     jsonConfigurationFile = "src/main/resources/codegen-config.json"
     generatedLanguage = GeneratedLanguage.KOTLIN // invalid in json
+}
+
+/**
+ * Generate apis and models in scala
+ */
+compileScala.dependsOn "graphqlCodegenScalaService"
+task graphqlCodegenScalaService(type: GraphQLCodegenGradleTask) {
+    graphqlSchemas.includePattern = "schema\\.graphqls"
+    outputDir = new File("src/main/scala-graphql")
+    jsonConfigurationFile = "src/main/resources/codegen-config.json"
+    generatedLanguage = GeneratedLanguage.SCALA
+}
+
+/**
+ * Generate apis and models in java
+ */
+compileJava.dependsOn "graphqlCodegenJavaService"
+task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
+    graphqlSchemas.includePattern = "schema\\.graphqls"
+    outputDir = new File("src/main/java-graphql")
+    jsonConfigurationFile = "src/main/resources/codegen-config.json"
+    generatedLanguage = GeneratedLanguage.JAVA
 }

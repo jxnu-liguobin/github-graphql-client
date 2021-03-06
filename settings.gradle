@@ -4,4 +4,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'github-graphql-sdk'
+rootProject.name = 'github-graphql-client'
+include 'scala-client'
+include 'java-client'
+include 'kotlin-client'
+

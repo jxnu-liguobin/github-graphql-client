@@ -1,11 +1,12 @@
 {
   "generateClient": true,
   "generateApis": true,
-  "generatedLanguage": "KOTLIN",
-  "generateBuilder": false,
+  "generateBuilder": true,
   "generateImmutableModels": true,
+  "generateToString": true,
   "apiPackageName": "io.github.graphql.resolver",
   "modelPackageName": "io.github.graphql.model",
   "generateModelOpenClasses": true,
-  "modelNameSuffix": "TO"
+  "modelNameSuffix": "TO",
+  "apiInterfaceStrategy": "DO_NOT_GENERATE"
 }
