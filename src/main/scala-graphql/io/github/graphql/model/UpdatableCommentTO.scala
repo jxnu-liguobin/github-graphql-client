@@ -1,0 +1,14 @@
+package io.github.graphql.model
+
+import CommentCannotUpdateReasonTO._
+
+@javax.annotation.Generated(
+    value = Array("com.kobylynskyi.graphql.codegen.GraphQLCodegen"),
+    date = "2021-03-06T19:48:00+0800"
+)
+trait UpdatableCommentTO {
+
+    @javax.validation.constraints.NotNull
+    val viewerCannotUpdateReasons: Seq[CommentCannotUpdateReasonTO]
+
+}
