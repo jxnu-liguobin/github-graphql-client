@@ -50,7 +50,7 @@ compileKotlin.dependsOn "graphqlCodegenKotlinService"
 task graphqlCodegenKotlinService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("src/main/kotlin-graphql")
-    jsonConfigurationFile = "src/main/resources/codegen-config.json"
+    jsonConfigurationFile = "src/main/resources/kotlin-codegen-config.json"
     generatedLanguage = GeneratedLanguage.KOTLIN // invalid in json
 }
 
@@ -61,8 +61,9 @@ compileScala.dependsOn "graphqlCodegenScalaService"
 task graphqlCodegenScalaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("src/main/scala-graphql")
-    jsonConfigurationFile = "src/main/resources/codegen-config.json"
-    generatedLanguage = GeneratedLanguage.SCALA
+    jsonConfigurationFile = "src/main/resources/scala-codegen-config.json"
+    generatedLanguage = GeneratedLanguage.SCALA // invalid in json
+
 }
 
 /**
@@ -72,6 +73,5 @@ compileJava.dependsOn "graphqlCodegenJavaService"
 task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("src/main/java-graphql")
-    jsonConfigurationFile = "src/main/resources/codegen-config.json"
-    generatedLanguage = GeneratedLanguage.JAVA
+    jsonConfigurationFile = "src/main/resources/java-codegen-config.json"
 }
