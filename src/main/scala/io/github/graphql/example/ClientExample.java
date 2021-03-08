@@ -1,11 +1,11 @@
 package io.github.graphql.example;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
-import io.github.graphql.common.ServerConfig;
-import io.github.graphql.java.GitHubJavaClient;
-import io.github.graphql.java.model.CodeOfConductQueryRequest;
-import io.github.graphql.java.model.CodeOfConductResponseProjection;
-import io.github.graphql.java.resolver.QueryResolver;
+import io.github.graphql.ServerConfig;
+import io.github.graphql.client.GitHubJavaClient;
+import io.github.graphql.j.model.CodeOfConductQueryRequest;
+import io.github.graphql.j.model.CodeOfConductResponseProjection;
+import io.github.graphql.j.resolver.QueryResolver;
 
 import java.util.Collections;
 

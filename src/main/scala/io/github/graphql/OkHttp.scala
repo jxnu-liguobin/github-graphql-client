@@ -1,4 +1,4 @@
-package io.github.graphql.common
+package io.github.graphql
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest
 import okhttp3._
@@ -9,6 +9,12 @@ import java.util
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Future, Promise}
 
+/**
+ *
+ * @author 梦境迷离
+ * @since 2021/3/8
+ * @version 1.0
+ */
 object OkHttp {
 
   private val json: MediaType = MediaType.parse("application/json; charset=utf-8")
@@ -49,8 +55,7 @@ object OkHttp {
           val jsonObject = new JSONObject(response.body().string())
           val dataJSON = jsonObject.getJSONObject("data")
           if (!dataJSON.isNull("errors")) {
-            println(dataJSON.getJSONObject("errors"))
-            promise.success(null)
+            throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
           } else {
             val data = dataJSON.get(request.getRequest.getOperationName)
             promise.success(deserialize(isCollection, data, entityClassName))
@@ -68,15 +73,21 @@ object OkHttp {
     if (isPrimitive(entityClazzName)) return data
     val result = new java.util.ArrayList[Any]()
     val targetClass = Class.forName(entityClazzName)
-    data match {
-      case array: JSONArray if isCollection =>
-        for (i <- 0 until array.length()) {
-          val e = Jackson.objectMapper.readValue(array.get(i).asInstanceOf[JSONObject].toString, targetClass)
-          result.add(e)
-        }
-        result
-      case _ =>
-        Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, targetClass)
+    try {
+      data match {
+        case array: JSONArray if isCollection =>
+          for (i <- 0 until array.length()) {
+            val e = Jackson.objectMapper.readValue(array.get(i).asInstanceOf[JSONObject].toString, targetClass)
+            result.add(e)
+          }
+          result
+        case _ =>
+          Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, targetClass)
+      }
+    } catch {
+      case e: Exception =>
+        throw ExecuteException("deserialize data failed: ", e.getLocalizedMessage, e)
+
     }
   }
 

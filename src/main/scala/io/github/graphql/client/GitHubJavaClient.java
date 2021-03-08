@@ -1,8 +1,9 @@
-package io.github.graphql.java;
+package io.github.graphql.client;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
-import io.github.graphql.common.ServerConfig;
+import io.github.graphql.ServerConfig;
+import io.github.graphql.JavaResolverProxy;
 
 import java.lang.reflect.Proxy;
 

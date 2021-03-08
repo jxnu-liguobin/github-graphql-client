@@ -65,7 +65,6 @@ task graphqlCodegenKotlinService(type: GraphQLCodegenGradleTask) {
 task graphqlCodegenScalaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/scala-graphql")
-    outputs.dir outputDir
     jsonConfigurationFile = "src/main/resources/scala-codegen-config.json"
 }
 

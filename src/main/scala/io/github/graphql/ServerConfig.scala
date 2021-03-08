@@ -1,7 +1,6 @@
-package io.github.graphql.common
+package io.github.graphql
 
 import scala.jdk.CollectionConverters._
-
 
 class ServerConfig private(val serverHost: String, val headers: Map[String, String], val responseProjectionMaxDepth: Int) {
   override def toString = s"ServerConfig($serverHost, $headers, $responseProjectionMaxDepth)"

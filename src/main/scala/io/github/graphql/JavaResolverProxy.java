@@ -1,11 +1,8 @@
-package io.github.graphql.java;
+package io.github.graphql;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseField;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
-import io.github.graphql.common.Execution;
-import io.github.graphql.common.JavaCollectionUtils;
-import io.github.graphql.common.ServerConfig;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
@@ -26,7 +23,7 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
         try {
             this.request = request.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw new ExecuteException("newInstance failed: ", e.getLocalizedMessage(), e);
         }
     }
 
@@ -36,8 +33,7 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
             try {
                 return method.invoke(this, args);
             } catch (Throwable t) {
-                t.printStackTrace();
-                return null;
+                throw new ExecuteException("invoke failed: ", t.getLocalizedMessage(), t);
             }
         } else {
             return proxyInvoke(method, args);
@@ -46,7 +42,7 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
 
     private Object proxyInvoke(Method method, Object[] args) {
         Field field = null;
-        List<GraphQLResponseField> fields = null;
+        List<GraphQLResponseField> fields;
         String entityClassName;
         Type type = method.getGenericReturnType();
         boolean isCollection = false;
@@ -70,7 +66,7 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
             field.setAccessible(true);
             fields = (List<GraphQLResponseField>) field.get(projection);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw new ExecuteException("access fields failed: ", e.getLocalizedMessage(), e);
         } finally {
             if (field != null) {
                 field.setAccessible(false);
