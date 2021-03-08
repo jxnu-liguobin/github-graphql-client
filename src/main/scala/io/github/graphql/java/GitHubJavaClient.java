@@ -2,35 +2,37 @@ package io.github.graphql.java;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
+import io.github.graphql.common.ServerConfig;
 
 import java.lang.reflect.Proxy;
 
 final public class GitHubJavaClient {
 
+    private ServerConfig config;
     private Class<?> resolver;
     private GraphQLResponseProjection projection;
-    private GraphQLOperationRequest request;
-    private int maxDepth;
+    private Class<? extends GraphQLOperationRequest> request;
 
     private GitHubJavaClient() {
 
     }
 
     private Object getResolver() {
-        JavaResolverProxy invocationHandler = new JavaResolverProxy(projection, request, maxDepth);
+        JavaResolverProxy invocationHandler = new JavaResolverProxy(config,projection, request);
         return Proxy.newProxyInstance(resolver.getClassLoader(), new Class[]{resolver}, invocationHandler);
+    }
+
+
+    public void setConfig(ServerConfig config) {
+        this.config = config;
     }
 
     private void setResolver(Class<?> resolver) {
         this.resolver = resolver;
     }
 
-    private void setRequest(GraphQLOperationRequest request) {
+    private void setRequest(Class<? extends GraphQLOperationRequest> request) {
         this.request = request;
-    }
-
-    private void setMaxDepth(int maxDepth) {
-        this.maxDepth = maxDepth;
     }
 
     private void setProjection(GraphQLResponseProjection projection) {
@@ -43,20 +45,20 @@ final public class GitHubJavaClient {
 
     public static class GitHubJavaClientBuilder {
         private GraphQLResponseProjection projection;
-        private GraphQLOperationRequest request;
-        private int maxDepth = 3;
+        private Class<? extends GraphQLOperationRequest> request;
+        private ServerConfig config;
 
         private GitHubJavaClientBuilder() {
 
         }
 
-        public GitHubJavaClientBuilder setRequest(GraphQLOperationRequest request) {
+        public GitHubJavaClientBuilder setRequest(Class<? extends GraphQLOperationRequest> request) {
             this.request = request;
             return this;
         }
 
-        public GitHubJavaClientBuilder setMaxDepth(int maxDepth) {
-            this.maxDepth = maxDepth;
+        public GitHubJavaClientBuilder setConfig(ServerConfig config) {
+            this.config = config;
             return this;
         }
 
@@ -79,7 +81,7 @@ final public class GitHubJavaClient {
             assert (request != null);
             invoke.setProjection(projection);
             invoke.setResolver(resolver);
-            invoke.setMaxDepth(maxDepth);
+            invoke.setConfig(config);
             invoke.setRequest(request);
             return (R) invoke.getResolver();
         }

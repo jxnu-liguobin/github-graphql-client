@@ -5,6 +5,7 @@ import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseField;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 import io.github.graphql.common.Execution;
 import io.github.graphql.common.JavaCollectionUtils;
+import io.github.graphql.common.ServerConfig;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
@@ -17,27 +18,28 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
 
     private GraphQLOperationRequest request;
 
-    private int maxDepth;
+    private final ServerConfig config;
 
-    public JavaResolverProxy(GraphQLResponseProjection projection, GraphQLOperationRequest request, int maxDepth) {
+    public JavaResolverProxy(ServerConfig config, GraphQLResponseProjection projection, Class<? extends GraphQLOperationRequest> request) {
+        this.config = config;
         this.projection = projection;
-        this.request = request;
-        this.maxDepth = maxDepth;
+        try {
+            this.request = request.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        System.out.println("before Invoking");
         if (Object.class.equals(method.getDeclaringClass())) {
             try {
-                System.out.println("invoking by resolver implement");
                 return method.invoke(this, args);
             } catch (Throwable t) {
                 t.printStackTrace();
                 return null;
             }
         } else {
-            System.out.println("invoking by dynamic proxy");
             return proxyInvoke(method, args);
         }
     }
@@ -45,13 +47,15 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
     private Object proxyInvoke(Method method, Object[] args) {
         Field field = null;
         List<GraphQLResponseField> fields = null;
-        String entityClazzName;
+        String entityClassName;
         Type type = method.getGenericReturnType();
+        boolean isCollection = false;
         if (type instanceof ParameterizedType) {
+            isCollection = true;
             Type[] parameterizedType = ((ParameterizedType) type).getActualTypeArguments();
-            entityClazzName = parameterizedType[0].getTypeName();
+            entityClassName = parameterizedType[0].getTypeName();
         } else {
-            entityClazzName = type.getTypeName();
+            entityClassName = type.getTypeName();
         }
         List<Parameter> parameters = Arrays.stream(method.getParameters()).collect(Collectors.toList());
 
@@ -75,9 +79,9 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
 
         //if fields not null, use it directly, because user want to select fields
         if (projection != null && (fields == null || fields.isEmpty())) {
-            projection = projection.all$(maxDepth);
+            projection = projection.all$(config.responseProjectionMaxDepth());
         }
 
-        return executeHttp(entityClazzName, request, projection);
+        return executeGraphQL(config, isCollection, entityClassName, request, projection);
     }
 }

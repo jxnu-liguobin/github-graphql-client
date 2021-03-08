@@ -2,18 +2,16 @@ package io.github.graphql.common
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest
 import okhttp3._
-import org.json.JSONObject
+import org.json.{JSONArray, JSONObject}
 
 import java.io.IOException
 import java.util
 import java.util.concurrent.TimeUnit
-import scala.concurrent.{ Future, Promise }
+import scala.concurrent.{Future, Promise}
 
-object OkHttp extends ResponseDeserializer {
+object OkHttp {
 
-  private val url = "http://localhost:8080/graphql"
-  private val defaultCharset = "utf8"
-  private val json = MediaType.parse("application/json; charset=utf-8")
+  private val json: MediaType = MediaType.parse("application/json; charset=utf-8")
   private lazy val defaultTimeout: Long = TimeUnit.MINUTES.toMillis(1)
   lazy val client: OkHttpClient = buildClient(defaultTimeout, defaultTimeout, defaultTimeout)
 
@@ -26,17 +24,20 @@ object OkHttp extends ResponseDeserializer {
       .build()
   }
 
-  def buildRequest[T](request: GraphQLRequest): (Request.Builder, Promise[T]) = {
+  def buildRequest[T](config: ServerConfig, request: GraphQLRequest): (Request.Builder, Promise[T]) = {
     val httpRequestBody = request.toHttpJsonBody
-    println(s"graphql request body: $httpRequestBody")
-    val rb = new Request.Builder().url(url).addHeader("Accept", "application/json; charset=utf-8").
+    println(s"config: $config, graphql request body: $httpRequestBody")
+    val rb = new Request.Builder().url(config.serverHost).addHeader("Accept", "application/json; charset=utf-8").
       post(RequestBody.create(httpRequestBody, json))
-    val promise = Promise[T]
+    config.headers.foreach(kv => {
+      rb.addHeader(kv._1, kv._2)
+    })
+    val promise = Promise[T]()
     rb -> promise
   }
 
-  def runQuery(request: GraphQLRequest, entityClazzName: String): Future[Any] = {
-    val (rb, promise) = buildRequest[Any](request)
+  def runQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Future[Any] = {
+    val (rb, promise) = buildRequest[Any](config, request)
     OkHttp.client.newCall(rb.build()).enqueue(new Callback {
 
       override def onFailure(call: Call, e: IOException): Unit = {
@@ -45,12 +46,15 @@ object OkHttp extends ResponseDeserializer {
 
       override def onResponse(call: Call, response: Response): Unit = {
         if (response.isSuccessful) {
-          val bytes = response.body().bytes()
-          val jsonStr = new String(bytes, defaultCharset)
-          val jsonObject = new JSONObject(jsonStr)
-          val data = jsonObject.getJSONObject("data").get(request.getRequest.getOperationName)
-          promise.success(deserialize(data, entityClazzName))
-
+          val jsonObject = new JSONObject(response.body().string())
+          val dataJSON = jsonObject.getJSONObject("data")
+          if (!dataJSON.isNull("errors")) {
+            println(dataJSON.getJSONObject("errors"))
+            promise.success(null)
+          } else {
+            val data = dataJSON.get(request.getRequest.getOperationName)
+            promise.success(deserialize(isCollection, data, entityClassName))
+          }
         } else {
           Future.successful(null)
         }
@@ -58,5 +62,26 @@ object OkHttp extends ResponseDeserializer {
       }
     })
     promise.future
+  }
+
+  private def deserialize(isCollection: Boolean, data: AnyRef, entityClazzName: String): Any = {
+    if (isPrimitive(entityClazzName)) return data
+    val result = new java.util.ArrayList[Any]()
+    val targetClass = Class.forName(entityClazzName)
+    data match {
+      case array: JSONArray if isCollection =>
+        for (i <- 0 until array.length()) {
+          val e = Jackson.objectMapper.readValue(array.get(i).asInstanceOf[JSONObject].toString, targetClass)
+          result.add(e)
+        }
+        result
+      case _ =>
+        Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, targetClass)
+    }
+  }
+
+  private def isPrimitive(entityClazzName: String): Boolean = {
+    val primitiveTypes = Seq("Int", "Boolean", "String", "Short", "Byte", "Long", "Char", "Float")
+    primitiveTypes.contains(entityClazzName)
   }
 }
