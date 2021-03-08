@@ -7,10 +7,12 @@
   "generateEqualsAndHashCode": true,
   "apiPackageName": "io.github.graphql.scala.resolver",
   "modelPackageName": "io.github.graphql.scala.model",
-  "generateModelOpenClasses": true,
+  "generateModelOpenClasses": false,
   "modelNameSuffix": "TO",
   "apiInterfaceStrategy": "DO_NOT_GENERATE",
   "apiRootInterfaceStrategy": "SINGLE_INTERFACE",
   "generateModelsForRootTypes": "true",
-  "apiNamePrefix": "GitHub"
+  "apiNamePrefix": "GitHub",
+  "addGeneratedAnnotation": false,
+  "generatedLanguage": "SCALA"
 }

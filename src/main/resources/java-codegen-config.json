@@ -12,5 +12,7 @@
   "apiInterfaceStrategy": "DO_NOT_GENERATE",
   "apiRootInterfaceStrategy": "SINGLE_INTERFACE",
   "generateModelsForRootTypes": "true",
-  "apiNamePrefix": "GitHub"
+  "apiNamePrefix": "GitHub",
+  "addGeneratedAnnotation": false,
+  "generatedLanguage": "JAVA"
 }
