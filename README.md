@@ -51,7 +51,7 @@ MDQ6VXNlcjI5NDk2ODcz
 object ScalaClientExample extends App {
 
   val userResponseProjection = new UserResponseProjection().id().avatarUrl().login().resourcePath()
-  val config = ServerConfig("https://api.github.com/graphql", Map("Authorization" -> "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"))
+  val config = ServerConfig("https://api.github.com/graphql", Map("Authorization" -> "Bearer xx"))
   val queryResolver = GithubScalaClient.newBuilder.setConfig(config).
     setProjection(userResponseProjection).
     buildV1[QueryResolver, UserQueryRequest]
