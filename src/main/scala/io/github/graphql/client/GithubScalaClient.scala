@@ -4,6 +4,7 @@ import com.kobylynskyi.graphql.codegen.model.graphql.{ GraphQLOperationRequest, 
 import io.github.graphql.{ ScalaResolverProxy, ServerConfig }
 
 import java.lang.reflect.Proxy
+import io.github.graphql.ScalaResolverProxyPlus
 
 class GithubScalaClient {
 
@@ -13,6 +14,11 @@ class GithubScalaClient {
 
   private def getResolverObject[Q <: GraphQLOperationRequest : Manifest]: AnyRef = {
     val invocationHandler = new ScalaResolverProxy[Q](config, projection)
+    Proxy.newProxyInstance(resolver.getClassLoader, Array[Class[_]](resolver), invocationHandler)
+  }
+
+  private def getResolverObject[Q <: GraphQLOperationRequest : Manifest, Out: Manifest]: AnyRef = {
+    val invocationHandler = new ScalaResolverProxyPlus[Q, Out](config, projection)
     Proxy.newProxyInstance(resolver.getClassLoader, Array[Class[_]](resolver), invocationHandler)
   }
 
@@ -44,6 +50,15 @@ object GithubScalaClient {
       invoke.projection = this.projection
       invoke.resolver = manifest[R].runtimeClass
       invoke.getResolverObject[Q].asInstanceOf[R]
+    }
+
+    def build[R: Manifest, Q <: GraphQLOperationRequest : Manifest, Out: Manifest]: R = {
+      assert(this.config != null)
+      val invoke = new GithubScalaClient
+      invoke.config = this.config
+      invoke.projection = this.projection
+      invoke.resolver = manifest[R].runtimeClass
+      invoke.getResolverObject[Q, Out].asInstanceOf[R]
     }
   }
 

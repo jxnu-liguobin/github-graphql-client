@@ -9,12 +9,6 @@ import java.util
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ Future, Promise }
 
-/**
- *
- * @author 梦境迷离
- * @since 2021/3/8
- * @version 1.0
- */
 object OkHttp {
 
   private val json: MediaType = MediaType.parse("application/json; charset=utf-8")
@@ -73,10 +67,32 @@ object OkHttp {
 
   }
 
+  private def scalaExtractData[Out: Manifest](response: Response, isCollection: Boolean, request: GraphQLRequest): Any = {
+    if (response.isSuccessful) {
+      val jsonObject = new JSONObject(response.body().string())
+      val dataJSON = jsonObject.getJSONObject("data")
+      if (!dataJSON.isNull("errors")) {
+        throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
+      } else {
+        val data = dataJSON.get(request.getRequest.getOperationName)
+        scalaDeserialize[Out](isCollection, data.toString)
+      }
+    } else {
+      null
+    }
+
+  }
+
   def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Any = {
     val rb = buildRequest(config, request)
     val response = OkHttp.client.newCall(rb.build()).execute()
     extractData(response, isCollection, request, entityClassName)
+  }
+
+  def syncRunQuery[Out: Manifest](config: ServerConfig, isCollection: Boolean, request: GraphQLRequest): Any = {
+    val rb = buildRequest(config, request)
+    val response = OkHttp.client.newCall(rb.build()).execute()
+    scalaExtractData[Out](response, isCollection, request)
   }
 
   private def deserialize(isCollection: Boolean, data: AnyRef, entityClazzName: String): Any = {
@@ -94,6 +110,18 @@ object OkHttp {
         case _ =>
           Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, targetClass)
       }
+    } catch {
+      case e: Exception =>
+        throw ExecuteException("deserialize data failed: ", e.getLocalizedMessage, e)
+
+    }
+  }
+
+  private def scalaDeserialize[Out: Manifest](isCollection: Boolean, data: String): Any = {
+    if (isPrimitive(manifest[Out].runtimeClass.getSimpleName)) return data
+    try {
+      if (isCollection) Jackson.objectMapper.readValue[List[Out]](data)
+      else Jackson.objectMapper.readValue[Out](data)
     } catch {
       case e: Exception =>
         throw ExecuteException("deserialize data failed: ", e.getLocalizedMessage, e)

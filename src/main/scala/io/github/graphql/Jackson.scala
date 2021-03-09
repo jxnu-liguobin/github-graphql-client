@@ -9,8 +9,8 @@ import com.fasterxml.jackson.module.scala.ScalaObjectMapper
 
 object Jackson {
 
-  lazy val objectMapper: ObjectMapper with ScalaObjectMapper = {
-    val mapper = new ObjectMapper() with ScalaObjectMapper
+  lazy val objectMapper: ObjectMapper with ScalaObjectMapper  with CaseClassObjectMapper= {
+    val mapper = new ObjectMapper() with ScalaObjectMapper with CaseClassObjectMapper
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
     mapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -18,6 +18,7 @@ object Jackson {
     mapper.registerModule(new Jdk8Module)
     mapper.registerModule(new JavaTimeModule)
     mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    mapper.setAllCaseClassEnabled(true)
     mapper
   }
 
