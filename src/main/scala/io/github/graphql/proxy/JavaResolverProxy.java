@@ -1,16 +1,25 @@
-package io.github.graphql;
+package io.github.graphql.proxy;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseField;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
+import io.github.graphql.ExecuteException;
+import io.github.graphql.CollectionUtils;
+import io.github.graphql.OkHttp;
+import io.github.graphql.ServerConfig;
+import io.github.graphql.deserializer.JavaDeserializerAdapter;
+import okhttp3.Response;
+import scala.Function1;
+import scala.Function4;
+import scala.Tuple4;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final public class JavaResolverProxy implements InvocationHandler {
+final public class JavaResolverProxy implements InvocationHandler, JavaDeserializerAdapter {
 
     private GraphQLResponseProjection projection;
 
@@ -59,7 +68,7 @@ final public class JavaResolverProxy implements InvocationHandler {
         if (!parameters.isEmpty()) {
             List<String> parameterNames = parameters.stream().map(Parameter::getName).collect(Collectors.toList());
             List<Object> arguments = Arrays.stream(args).collect(Collectors.toList());
-            request.getInput().putAll(JavaCollectionUtils.listToMap(parameterNames, arguments));
+            request.getInput().putAll(CollectionUtils.listToMap(parameterNames, arguments));
         }
         // TODO remove reflect
         try {
@@ -76,12 +85,12 @@ final public class JavaResolverProxy implements InvocationHandler {
 
         //if fields not null, use it directly, because user want to select fields
         if (projection != null && (fields == null || fields.isEmpty())) {
-            projection = projection.all$(config.responseProjectionMaxDepth());
+            throw new ExecuteException("projection verification failed: ", "fields of projection cannot be empty", null);
         }
 
         GraphQLRequest graphQLRequest = new GraphQLRequest(request, projection);
         Object ret;
-        ret = OkHttp.syncRunQuery(config, isCollection, graphQLRequest, entityClassName);
+        ret = OkHttp.syncRunQuery(config, isCollection, graphQLRequest, entityClassName, buildFunction4());
         return ret;
     }
 

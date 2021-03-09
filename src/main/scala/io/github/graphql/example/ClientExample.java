@@ -2,7 +2,6 @@ package io.github.graphql.example;
 
 import io.github.graphql.ServerConfig;
 import io.github.graphql.client.GitHubJavaClient;
-import io.github.graphql.j.model.RepositoryOwnerQueryRequest;
 import io.github.graphql.j.model.UserQueryRequest;
 import io.github.graphql.j.model.UserResponseProjection;
 import io.github.graphql.j.model.UserTO;
@@ -18,7 +17,7 @@ public class ClientExample {
 
         QueryResolver queryResolver = GitHubJavaClient.newBuilder()
                 // 2. Set the service endpoint.
-                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer x"), 3))
+                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"), 3))
                 .setProjection(userResponseProjection)
                 // 3. Set the request corresponding to the resolver.
                 .setRequest(UserQueryRequest.class)

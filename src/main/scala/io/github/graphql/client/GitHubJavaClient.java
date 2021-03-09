@@ -3,7 +3,7 @@ package io.github.graphql.client;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 import io.github.graphql.ServerConfig;
-import io.github.graphql.JavaResolverProxy;
+import io.github.graphql.proxy.JavaResolverProxy;
 
 import java.lang.reflect.Proxy;
 
@@ -19,7 +19,7 @@ final public class GitHubJavaClient {
     }
 
     private Object getResolver() {
-        JavaResolverProxy invocationHandler = new JavaResolverProxy(config,projection, request);
+        JavaResolverProxy invocationHandler = new JavaResolverProxy(config, projection, request);
         return Proxy.newProxyInstance(resolver.getClassLoader(), new Class[]{resolver}, invocationHandler);
     }
 
@@ -76,7 +76,7 @@ final public class GitHubJavaClient {
          * @return R resolver which need for invoke graphql
          */
         @SuppressWarnings(value = "unchecked")
-        public <R> R build(Class<R> resolver) {
+        public <Resolver> Resolver build(Class<Resolver> resolver) {
             GitHubJavaClient invoke = new GitHubJavaClient();
             assert (resolver != null);
             assert (request != null);
@@ -84,7 +84,7 @@ final public class GitHubJavaClient {
             invoke.setResolver(resolver);
             invoke.setConfig(config);
             invoke.setRequest(request);
-            return (R) invoke.getResolver();
+            return (Resolver) invoke.getResolver();
         }
     }
 

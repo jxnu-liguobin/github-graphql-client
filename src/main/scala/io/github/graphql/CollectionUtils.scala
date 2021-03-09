@@ -2,7 +2,7 @@ package io.github.graphql
 
 import scala.jdk.CollectionConverters._
 
-object JavaCollectionUtils {
+object CollectionUtils {
 
   def listToMap[K, V](keys: java.util.List[K], values: java.util.List[V]): java.util.Map[K, V] = {
     (keys.asScala zip values.asScala).toMap.asJava

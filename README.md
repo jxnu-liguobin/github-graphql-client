@@ -1,9 +1,16 @@
 DOING
 
-GitHub graphql API of three languages contains Java, kotlin, Scala, mainly for
+GitHub graphql API of three languages contains Java, Kotlin, Scala, mainly for
 testing [graphql-java-codegen]( https://github.com/kobylynskyi/graphql-java-codegen).
 
+# Environment
+
+- Java 1.8
+- Scala 2.13.5
+- Kotlin 1.4.31
+
 # Java
+
 
 1. Execute gradle task to generate Java codes `gradle graphqlCodegenJavaService`
 2. Use `GitHubJavaClient` to build resolver client.
@@ -29,25 +36,45 @@ public class ClientExample {
     }
 }
 ```
+**Result**
+```
+MDQ6VXNlcjI5NDk2ODcz
+```
 
 # Scala
 
 
-1. Execute gradle task to generate Java codes `gradle graphqlCodegenScalaService`
+1. Execute gradle task to generate Scala codes `gradle graphqlCodegenScalaService`
 2. Use `GitHubScalaClient` to build resolver client.
 ```scala
+
 object ScalaClientExample extends App {
 
   val userResponseProjection = new UserResponseProjection().id().avatarUrl().login().resourcePath()
-  val config = ServerConfig("https://api.github.com/graphql", Map("Authorization" -> "Bearer x"))
+  val config = ServerConfig("https://api.github.com/graphql", Map("Authorization" -> "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"))
   val queryResolver = GithubScalaClient.newBuilder.setConfig(config).
     setProjection(userResponseProjection).
-    build[QueryResolver, UserQueryRequest]
+    buildV1[QueryResolver, UserQueryRequest]
 
   val userTO = queryResolver.user("jxnu-liguobin")
-  println(userTO.id) //TODO request tostring has bug.
+  println(userTO.id) //tostring failed, because jackson use java Deserializer 
+
+
+  // Use scalaDeserialize with ScalaObjectMapper, but ScalaObjectMapper will not be available in scala3.
+  // Use Scala reflection instead of java reflection
+  val userResponseProjection1 = new UserResponseProjection().id().avatarUrl().login().resourcePath()
+  val queryResolver1 = GithubScalaClient.newBuilder.setConfig(config).
+    setProjection(userResponseProjection).
+    buildV2[QueryResolver, UserQueryRequest, UserTO]
+
+  val userTO1 = queryResolver1.user("jxnu-liguobin")
+  println(userTO.toString())
 
 }
+```
+**Result**
+```json
+{id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
 ```
 
 

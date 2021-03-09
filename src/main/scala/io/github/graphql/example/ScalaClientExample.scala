@@ -10,23 +10,23 @@ import io.github.graphql.s.model.UserTO
 object ScalaClientExample extends App {
 
   val userResponseProjection = new UserResponseProjection().id().avatarUrl().login().resourcePath()
-  val config = ServerConfig("https://api.github.com/graphql", Map("Authorization" -> "Bearer eab669ff8286e9a87e97f84cb7a9fad706e1a20f"))
+  val config = ServerConfig("https://api.github.com/graphql", Map("Authorization" -> "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"))
   val queryResolver = GithubScalaClient.newBuilder.setConfig(config).
     setProjection(userResponseProjection).
-    build[QueryResolver, UserQueryRequest]
+    buildV1[QueryResolver, UserQueryRequest]
 
   val userTO = queryResolver.user("jxnu-liguobin")
-  println(userTO.id) //TODO request tostring has bug.
+  println(userTO.id) //tostring failed, because jackson use java Deserializer
 
 
-  // use scalaDeserialize with ScalaObjectMapper, but ScalaObjectMapper will not be available in scala3.
+  // Use scalaDeserialize with ScalaObjectMapper, but ScalaObjectMapper will not be available in scala3.
+  // Use Scala reflection instead of java reflection
   val userResponseProjection1 = new UserResponseProjection().id().avatarUrl().login().resourcePath()
   val queryResolver1 = GithubScalaClient.newBuilder.setConfig(config).
     setProjection(userResponseProjection).
-    build[QueryResolver, UserQueryRequest, UserTO]
+    buildV2[QueryResolver, UserQueryRequest, UserTO]
 
-  val userTO1 = queryResolver.user("jxnu-liguobin")
+  val userTO1 = queryResolver1.user("jxnu-liguobin")
   println(userTO.toString())
-
 
 }

@@ -1,15 +1,14 @@
 package io.github.graphql
 
-import java.util.Objects
-
 import com.fasterxml.jackson.core.{ JsonParser, JsonProcessingException }
+import com.fasterxml.jackson.databind.{ DeserializationContext, ObjectMapper }
 import com.fasterxml.jackson.databind.`type`.TypeFactory
-import com.fasterxml.jackson.databind.{ BeanDescription, DeserializationContext, JsonNode, ObjectMapper }
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition
 import com.fasterxml.jackson.databind.node.{ NullNode, ObjectNode }
 
+import java.util.Objects
 import scala.reflect.runtime.universe._
 
 class CaseClassDeserializer[T: Manifest]() extends StdDeserializer[T](manifest[T].runtimeClass) {
@@ -30,12 +29,12 @@ class CaseClassDeserializer[T: Manifest]() extends StdDeserializer[T](manifest[T
 
   private[this] def zeroValue(tpe: Type) = {
     tpe match {
-      case t: Type if t =:= typeOf[Boolean] ⇒ Boolean.box(false)
-      case t: Type if t <:< typeOf[Option[_]] ⇒ None
+      case t: Type if t =:= typeOf[Boolean] => Boolean.box(false)
+      case t: Type if t <:< typeOf[Option[_]] => None
       //      case t: Type if t <:< typeOf[collection.Map[_, _]] ⇒ collection.Map.empty
       //      case t: Type if t <:< typeOf[Iterable[_]] ⇒ Nil
-      case t: Type if CaseClassDeserializer.numberTypes.contains(t) ⇒ 0.asInstanceOf[AnyRef]
-      case _: Type ⇒ None.orNull
+      case t: Type if CaseClassDeserializer.numberTypes.contains(t) => 0.asInstanceOf[AnyRef]
+      case _: Type => None.orNull
     }
   }
 
@@ -56,7 +55,7 @@ class CaseClassDeserializer[T: Manifest]() extends StdDeserializer[T](manifest[T
     val beanDesc = ctxt.getConfig.introspect(valueType)
 
     val params = constructor.symbol.paramLists.head.zipWithIndex.map {
-      case (field, index) ⇒
+      case (field, index) =>
         val beanPropertyDefinition: BeanPropertyDefinition = beanDesc.findProperties().get(index)
         val subNodeOpt = Option(node.get(field.name.toString))
         val originJavaType = mapper.constructType(field.typeSignature)

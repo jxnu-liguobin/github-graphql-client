@@ -2,20 +2,18 @@ package io.github.graphql
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest
 import okhttp3._
-import org.json.{ JSONArray, JSONObject }
 
-import java.io.IOException
 import java.util
 import java.util.concurrent.TimeUnit
-import scala.concurrent.{ Future, Promise }
 
 object OkHttp {
 
-  private val json: MediaType = MediaType.parse("application/json; charset=utf-8")
+  private val `application/json` = "application/json; charset=utf-8"
+  private val json: MediaType = MediaType.parse(`application/json`)
   private lazy val defaultTimeout: Long = TimeUnit.MINUTES.toMillis(1)
-  lazy val client: OkHttpClient = buildClient(defaultTimeout, defaultTimeout, defaultTimeout)
+  private lazy val client: OkHttpClient = buildClient(defaultTimeout, defaultTimeout, defaultTimeout)
 
-  def buildClient(readTimeout: Long, writeTimeout: Long, connectTimeout: Long): OkHttpClient = {
+  private def buildClient(readTimeout: Long, writeTimeout: Long, connectTimeout: Long): OkHttpClient = {
     new OkHttpClient.Builder()
       .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
       .writeTimeout(writeTimeout, TimeUnit.MILLISECONDS)
@@ -24,10 +22,10 @@ object OkHttp {
       .build()
   }
 
-  def buildRequest(config: ServerConfig, request: GraphQLRequest): Request.Builder = {
+  private def buildRequest(config: ServerConfig, request: GraphQLRequest): Request.Builder = {
     val httpRequestBody = request.toHttpJsonBody
     println(s"config: $config, graphql request body: $httpRequestBody")
-    val rb = new Request.Builder().url(config.serverHost).addHeader("Accept", "application/json; charset=utf-8").
+    val rb = new Request.Builder().url(config.serverHost).addHeader("Accept", `application/json`).
       post(RequestBody.create(httpRequestBody, json))
     config.headers.foreach(kv => {
       rb.addHeader(kv._1, kv._2)
@@ -35,102 +33,18 @@ object OkHttp {
     rb
   }
 
-  def runQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Future[Any] = {
-    val promise = Promise[Any]()
-    val rb = buildRequest(config, request)
-    OkHttp.client.newCall(rb.build()).enqueue(new Callback {
-
-      override def onFailure(call: Call, e: IOException): Unit = {
-        promise.failure(e)
-      }
-
-      override def onResponse(call: Call, response: Response): Unit = {
-        promise.success(extractData(response, isCollection, request, entityClassName))
-      }
-    })
-    promise.future
-  }
-
-  private def extractData(response: Response, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Any = {
-    if (response.isSuccessful) {
-      val jsonObject = new JSONObject(response.body().string())
-      val dataJSON = jsonObject.getJSONObject("data")
-      if (!dataJSON.isNull("errors")) {
-        throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
-      } else {
-        val data = dataJSON.get(request.getRequest.getOperationName)
-        deserialize(isCollection, data, entityClassName)
-      }
-    } else {
-      null
-    }
-
-  }
-
-  private def scalaExtractData[Out: Manifest](response: Response, isCollection: Boolean, request: GraphQLRequest): Any = {
-    if (response.isSuccessful) {
-      val jsonObject = new JSONObject(response.body().string())
-      val dataJSON = jsonObject.getJSONObject("data")
-      if (!dataJSON.isNull("errors")) {
-        throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
-      } else {
-        val data = dataJSON.get(request.getRequest.getOperationName)
-        scalaDeserialize[Out](isCollection, data.toString)
-      }
-    } else {
-      null
-    }
-
-  }
-
-  def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Any = {
+  def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String)
+    (fun: (Response, Boolean, GraphQLRequest, String) => Any): Any = {
     val rb = buildRequest(config, request)
     val response = OkHttp.client.newCall(rb.build()).execute()
-    extractData(response, isCollection, request, entityClassName)
+    fun(response, isCollection, request, entityClassName)
   }
 
-  def syncRunQuery[Out: Manifest](config: ServerConfig, isCollection: Boolean, request: GraphQLRequest): Any = {
+  def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest)
+    (fun: (Response, Boolean, GraphQLRequest) => Any): Any = {
     val rb = buildRequest(config, request)
     val response = OkHttp.client.newCall(rb.build()).execute()
-    scalaExtractData[Out](response, isCollection, request)
+    fun(response, isCollection, request)
   }
 
-  private def deserialize(isCollection: Boolean, data: AnyRef, entityClazzName: String): Any = {
-    if (isPrimitive(entityClazzName)) return data
-    val result = new java.util.ArrayList[Any]()
-    val targetClass = Class.forName(entityClazzName)
-    try {
-      data match {
-        case array: JSONArray if isCollection =>
-          for (i <- 0 until array.length()) {
-            val e = Jackson.objectMapper.readValue(array.get(i).asInstanceOf[JSONObject].toString, targetClass)
-            result.add(e)
-          }
-          result
-        case _ =>
-          Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, targetClass)
-      }
-    } catch {
-      case e: Exception =>
-        throw ExecuteException("deserialize data failed: ", e.getLocalizedMessage, e)
-
-    }
-  }
-
-  private def scalaDeserialize[Out: Manifest](isCollection: Boolean, data: String): Any = {
-    if (isPrimitive(manifest[Out].runtimeClass.getSimpleName)) return data
-    try {
-      if (isCollection) Jackson.objectMapper.readValue[List[Out]](data)
-      else Jackson.objectMapper.readValue[Out](data)
-    } catch {
-      case e: Exception =>
-        throw ExecuteException("deserialize data failed: ", e.getLocalizedMessage, e)
-
-    }
-  }
-
-  private def isPrimitive(entityClazzName: String): Boolean = {
-    val primitiveTypes = Seq("Int", "Boolean", "String", "Short", "Byte", "Long", "Char", "Float")
-    primitiveTypes.contains(entityClazzName)
-  }
 }
