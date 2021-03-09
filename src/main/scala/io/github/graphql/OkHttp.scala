@@ -2,12 +2,12 @@ package io.github.graphql
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest
 import okhttp3._
-import org.json.{JSONArray, JSONObject}
+import org.json.{ JSONArray, JSONObject }
 
 import java.io.IOException
 import java.util
 import java.util.concurrent.TimeUnit
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ Future, Promise }
 
 /**
  *
@@ -30,7 +30,7 @@ object OkHttp {
       .build()
   }
 
-  def buildRequest[T](config: ServerConfig, request: GraphQLRequest): (Request.Builder, Promise[T]) = {
+  def buildRequest(config: ServerConfig, request: GraphQLRequest): Request.Builder = {
     val httpRequestBody = request.toHttpJsonBody
     println(s"config: $config, graphql request body: $httpRequestBody")
     val rb = new Request.Builder().url(config.serverHost).addHeader("Accept", "application/json; charset=utf-8").
@@ -38,12 +38,12 @@ object OkHttp {
     config.headers.foreach(kv => {
       rb.addHeader(kv._1, kv._2)
     })
-    val promise = Promise[T]()
-    rb -> promise
+    rb
   }
 
   def runQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Future[Any] = {
-    val (rb, promise) = buildRequest[Any](config, request)
+    val promise = Promise[Any]()
+    val rb = buildRequest(config, request)
     OkHttp.client.newCall(rb.build()).enqueue(new Callback {
 
       override def onFailure(call: Call, e: IOException): Unit = {
@@ -51,22 +51,32 @@ object OkHttp {
       }
 
       override def onResponse(call: Call, response: Response): Unit = {
-        if (response.isSuccessful) {
-          val jsonObject = new JSONObject(response.body().string())
-          val dataJSON = jsonObject.getJSONObject("data")
-          if (!dataJSON.isNull("errors")) {
-            throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
-          } else {
-            val data = dataJSON.get(request.getRequest.getOperationName)
-            promise.success(deserialize(isCollection, data, entityClassName))
-          }
-        } else {
-          Future.successful(null)
-        }
-
+        promise.success(extractData(response, isCollection, request, entityClassName))
       }
     })
     promise.future
+  }
+
+  private def extractData(response: Response, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Any = {
+    if (response.isSuccessful) {
+      val jsonObject = new JSONObject(response.body().string())
+      val dataJSON = jsonObject.getJSONObject("data")
+      if (!dataJSON.isNull("errors")) {
+        throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
+      } else {
+        val data = dataJSON.get(request.getRequest.getOperationName)
+        deserialize(isCollection, data, entityClassName)
+      }
+    } else {
+      null
+    }
+
+  }
+
+  def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Any = {
+    val rb = buildRequest(config, request)
+    val response = OkHttp.client.newCall(rb.build()).execute()
+    extractData(response, isCollection, request, entityClassName)
   }
 
   private def deserialize(isCollection: Boolean, data: AnyRef, entityClazzName: String): Any = {

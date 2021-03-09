@@ -1,6 +1,7 @@
 package io.github.graphql;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
+import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseField;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 
@@ -9,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final public class JavaResolverProxy implements InvocationHandler, Execution {
+final public class JavaResolverProxy implements InvocationHandler {
 
     private GraphQLResponseProjection projection;
 
@@ -78,6 +79,10 @@ final public class JavaResolverProxy implements InvocationHandler, Execution {
             projection = projection.all$(config.responseProjectionMaxDepth());
         }
 
-        return executeGraphQL(config, isCollection, entityClassName, request, projection);
+        GraphQLRequest graphQLRequest = new GraphQLRequest(request, projection);
+        Object ret;
+        ret = OkHttp.syncRunQuery(config, isCollection, graphQLRequest, entityClassName);
+        return ret;
     }
+
 }

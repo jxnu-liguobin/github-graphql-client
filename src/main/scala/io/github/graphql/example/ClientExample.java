@@ -1,10 +1,11 @@
 package io.github.graphql.example;
 
-import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 import io.github.graphql.ServerConfig;
 import io.github.graphql.client.GitHubJavaClient;
-import io.github.graphql.j.model.CodeOfConductQueryRequest;
-import io.github.graphql.j.model.CodeOfConductResponseProjection;
+import io.github.graphql.j.model.RepositoryOwnerQueryRequest;
+import io.github.graphql.j.model.UserQueryRequest;
+import io.github.graphql.j.model.UserResponseProjection;
+import io.github.graphql.j.model.UserTO;
 import io.github.graphql.j.resolver.QueryResolver;
 
 import java.util.Collections;
@@ -12,14 +13,21 @@ import java.util.Collections;
 public class ClientExample {
     public static void main(String[] args) throws Exception {
 
-        GraphQLResponseProjection codeOfConductResponseProjection = new CodeOfConductResponseProjection().all$();
+        // 1. Use projection to select the preset returned.
+        UserResponseProjection userResponseProjection = new UserResponseProjection().id().avatarUrl().login().resourcePath();
 
         QueryResolver queryResolver = GitHubJavaClient.newBuilder()
-                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", ""), 3))
-                .setProjection(codeOfConductResponseProjection)
-                .setRequest(CodeOfConductQueryRequest.class)
+                // 2. Set the service endpoint.
+                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer x"), 3))
+                .setProjection(userResponseProjection)
+                // 3. Set the request corresponding to the resolver.
+                .setRequest(UserQueryRequest.class)
+                // 4. Set the resolver that needs a proxy.
                 .build(QueryResolver.class);
 
-        queryResolver.codeOfConduct("hello");
+        // 5. Use resolver to create a call.
+        UserTO userTO = queryResolver.user("jxnu-liguobin"); // projection and request must correspond to the return type of the user method.
+        System.out.println(userTO.toString());
+
     }
 }

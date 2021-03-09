@@ -24,7 +24,7 @@ final public class GitHubJavaClient {
     }
 
 
-    public void setConfig(ServerConfig config) {
+    private void setConfig(ServerConfig config) {
         this.config = config;
     }
 
