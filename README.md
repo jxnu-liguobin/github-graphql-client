@@ -84,7 +84,7 @@ object ScalaClientExample extends App {
 {id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
 ```
 
-# Kotlin (Testing)
+# Kotlin (Doesn't testing)
 
 
 1. Execute gradle task to generate Kotlin codes `gradle graphqlCodegenKotlinService`
@@ -99,7 +99,7 @@ object KotlinClientExample {
             .setConfig(
                 ServerConfigAdapter(
                     "https://api.github.com/graphql",
-                    Collections.singletonMap("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"),
+                    mapOf(Pair("Authorization", "Bearer xx")),
                     3
                 )
             )

@@ -6,7 +6,6 @@ import io.github.graphql.k.model.UserQueryRequest
 import io.github.graphql.k.model.UserResponseProjection
 import io.github.graphql.k.model.UserTO
 import io.github.graphql.k.resolver.QueryResolver
-import java.util.*
 
 object KotlinClientExample {
 
@@ -17,7 +16,7 @@ object KotlinClientExample {
             .setConfig(
                 ServerConfigAdapter(
                     "https://api.github.com/graphql",
-                    Collections.singletonMap("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"),
+                    mapOf(Pair("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b")),
                     3
                 )
             )
