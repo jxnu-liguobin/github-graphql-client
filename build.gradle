@@ -81,13 +81,13 @@ task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
 tasks.withType(JavaCompile).configureEach {
     options.fork = true
     options.incremental = true
-    options.compilerArgs += ['-parameters']
+    options.compilerArgs += ['-parameters','-Xlint:unchecked']
 }
 
 tasks.withType(ScalaCompile).configureEach {
     options.fork = true
     options.incremental = true
-    options.compilerArgs += ['-parameters']
+    options.compilerArgs += ['-parameters', '-Xlint:unchecked']
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {

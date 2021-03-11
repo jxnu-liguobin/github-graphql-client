@@ -26,25 +26,25 @@ internal class KotlinResolverProxy(
         fun <K, V> listToMap(keys: List<K>, values: List<V>): Map<K, V> {
             return keys.zip(values).toMap()
         }
+
+        fun getFieldsValue(p: GraphQLResponseProjection): List<GraphQLResponseField> {
+            return p.javaClass.superclass.getDeclaredField("fields").let {
+                it.isAccessible = true
+                return@let it.get(p) as List<GraphQLResponseField>
+            }
+        }
         if (args != null && args.isNotEmpty() && parameters.isNotEmpty()) {
             val parameterNames = parameters.map { obj: Parameter -> obj.name }
             requestInstance.input.putAll(listToMap<String, Any>(parameterNames, args.toList()))
         }
-        val fields = projection?.getFieldsValue()
 
-        if (projection != null && (fields?.isEmpty() == true)) {
-            throw ExecuteExceptionAdapter("projection verification failed: ", "fields of projection cannot be empty", null)
+        if (projection != null) {
+            val fields = getFieldsValue(projection)
+            if (fields.isEmpty()) {
+                throw ExecuteExceptionAdapter("projection verification failed: ", "fields of projection cannot be empty", null)
+            }
         }
         val graphQLRequest = GraphQLRequest(requestInstance, projection)
         return OkHttpAdapter.syncRunQuery(config, graphQLRequest)
     }
-
-
-    private fun GraphQLResponseProjection.getFieldsValue(): List<GraphQLResponseField> {
-        return javaClass.getDeclaredField("fields").let {
-            it.isAccessible = true
-            return@let it.get(this) as List<GraphQLResponseField>;
-        }
-    }
-
 }
