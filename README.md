@@ -85,7 +85,7 @@ object ScalaClientExample extends App {
 {id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
 ```
 
-# Kotlin
+# Kotlin Testing
 
 
 1. Execute gradle task to generate Kotlin codes `gradle graphqlCodegenKotlinService`

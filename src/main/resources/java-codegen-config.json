@@ -7,7 +7,6 @@
   "generateEqualsAndHashCode": true,
   "apiPackageName": "io.github.graphql.j.resolver",
   "modelPackageName": "io.github.graphql.j.model",
-  "generateModelOpenClasses": true,
   "modelNameSuffix": "TO",
   "apiInterfaceStrategy": "DO_NOT_GENERATE",
   "apiRootInterfaceStrategy": "SINGLE_INTERFACE",

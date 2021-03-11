@@ -14,5 +14,6 @@
   "generateModelsForRootTypes": "true",
   "apiNamePrefix": "GitHub",
   "addGeneratedAnnotation": false,
+  "generateApisWithThrowsException":false,
   "generatedLanguage": "SCALA"
 }
