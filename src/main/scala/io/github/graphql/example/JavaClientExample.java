@@ -9,7 +9,7 @@ import io.github.graphql.j.resolver.QueryResolver;
 
 import java.util.Collections;
 
-public class ClientExample {
+public class JavaClientExample {
     public static void main(String[] args) throws Exception {
 
         // 1. Use projection to select the preset returned.

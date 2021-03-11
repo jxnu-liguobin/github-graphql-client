@@ -4,11 +4,13 @@ GitHub GraphQL client implement by proxy, mainly for testing [graphql-java-codeg
 
 [A Chinese SDK Example which does not use jdk proxy](https://github.com/growingio/growingio-graphql-javasdk)
 
+There are many classes in the three languages, which will lead to slow compilation and large memory requirement. Therefore, a single language should be used for testing, and you should enable parallel compilation.
+
 # Environment
 
 - Java 1.8
 - Scala 2.13.5
-- Kotlin 1.4.31
+- Kotlin 1.4.0
 
 ## Source code description
 
@@ -22,7 +24,7 @@ GitHub GraphQL client implement by proxy, mainly for testing [graphql-java-codeg
 1. Execute gradle task to generate Java codes `gradle graphqlCodegenJavaService`
 2. Use `GitHubJavaClient` to build resolver client.
 ```java
-public class ClientExample {
+public class JavaClientExample {
     public static void main(String[] args) throws Exception {
 
         // 1. Use projection to select the preset returned.

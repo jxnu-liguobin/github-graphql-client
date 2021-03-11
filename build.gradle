@@ -3,7 +3,7 @@ import io.github.kobylynskyi.graphql.codegen.gradle.GraphQLCodegenGradleTask
 plugins {
     id 'java'
     id 'scala'
-    id "org.jetbrains.kotlin.jvm" version "1.4.31"
+    id "org.jetbrains.kotlin.jvm" version "1.4.0"
     id "io.github.kobylynskyi.graphql.codegen" version "4.1.5-SNAPSHOT"
 }
 
@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2'
 
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.0"
 
     implementation "org.scala-lang:scala-library:2.13.5"
     implementation "org.scala-lang:scala-reflect:2.13.5"
@@ -79,20 +79,19 @@ task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
 }
 
 tasks.withType(JavaCompile).configureEach {
-//    options.fork = true
+    options.fork = true
     options.incremental = true
     options.compilerArgs += ['-parameters']
 }
 
 tasks.withType(ScalaCompile).configureEach {
-//    options.fork = true
+    options.fork = true
     options.incremental = true
     options.compilerArgs += ['-parameters']
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
-        freeCompilerArgs = ["-Xmx1024"]
         jvmTarget = '1.8'
         javaParameters = true
     }
