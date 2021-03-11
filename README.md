@@ -3,11 +3,19 @@ DOING
 GitHub graphql API of three languages contains Java, Kotlin, Scala, mainly for
 testing [graphql-java-codegen]( https://github.com/kobylynskyi/graphql-java-codegen).
 
+[A Chinese SDK Example which does not use jdk proxy](https://github.com/growingio/growingio-graphql-javasdk)
+
 # Environment
 
 - Java 1.8
 - Scala 2.13.5
 - Kotlin 1.4.31
+
+## Source code description
+
+- `src/main/resources` It contains github graphql schema file and code generation configuration of the three languages.
+- `src/main/scala` It is mainly implemented by Scala, which provides Scala proxy client by Scala reflection and Java reflection, and Java proxy client by Java reflection. 
+- `src/main/kotlin` It is implemented by Kotlin, which provides Kotlin proxy client by Java reflection.
 
 # Java
 
@@ -73,8 +81,40 @@ object ScalaClientExample extends App {
 }
 ```
 **Result**
-```json
+```
 {id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
+```
+
+# Kotlin
+
+
+1. Execute gradle task to generate Kotlin codes `gradle graphqlCodegenKotlinService`
+2. Use `GitHubKotlinClient` to build resolver client.
+```kotlin
+object KotlinClientExample {
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val userResponseProjection = UserResponseProjection().id().avatarUrl().login().resourcePath()
+        val queryResolver = GithubKotlinClient.newBuilder()
+            .setConfig(
+                ServerConfig.apply(
+                    "https://api.github.com/graphql",
+                    Collections.singletonMap("Authorization", "Bearer xx"),
+                    3
+                )
+            )
+            .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
+
+        val userTO: UserTO? = queryResolver.user("jxnu-liguobin")
+
+        println(userTO.toString())
+    }
+}
+```
+**Result**
+```
+
 ```
 
 

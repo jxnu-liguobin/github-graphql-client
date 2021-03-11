@@ -13,11 +13,10 @@ version '0.1.0-SNAPSHOT'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 sourceSets {
-    main.kotlin.srcDirs += "$buildDir/kotlin-graphql"
     main.scala.srcDirs += ["$buildDir/scala-graphql", "$buildDir/java-graphql"]
     main.java.srcDirs = []
+    main.kotlin.srcDirs += ["$buildDir/kotlin-graphql"]
 }
-
 
 allprojects {
     repositories {
@@ -30,20 +29,20 @@ allprojects {
 dependencies {
     implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.5-SNAPSHOT"
     implementation "javax.validation:validation-api:2.0.1.Final"
-    implementation "com.squareup.okhttp3:okhttp:4.2.2"
+    implementation "com.squareup.okhttp3:okhttp:4.9.1"
     implementation "org.json:json:20201115"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.12.0"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.12.0"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.12.0"
-    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.11.3'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.3'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3'
+    implementation "com.fasterxml.jackson.core:jackson-core:2.12.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.12.2"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.12.2"
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2'
 
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31"
 
     implementation "org.scala-lang:scala-library:2.13.5"
-    implementation "org.scala-lang:scala-compiler:2.13.5"
+    implementation "org.scala-lang:scala-reflect:2.13.5"
     implementation "com.fasterxml.jackson.module:jackson-module-scala_2.13:2.12.2"
 //    implementation "com.github.changvvb:jackson-module-caseclass_2.12:1.1.1" //only support 2.12
 
@@ -80,19 +79,21 @@ task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.fork = true
+//    options.fork = true
     options.incremental = true
     options.compilerArgs += ['-parameters']
 }
 
 tasks.withType(ScalaCompile).configureEach {
-    options.fork = true
+//    options.fork = true
     options.incremental = true
     options.compilerArgs += ['-parameters']
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
+        freeCompilerArgs = ["-Xmx1024"]
+        jvmTarget = '1.8'
         javaParameters = true
     }
 }

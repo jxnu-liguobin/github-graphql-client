@@ -4,15 +4,8 @@ import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseField;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
-import io.github.graphql.ExecuteException;
-import io.github.graphql.CollectionUtils;
-import io.github.graphql.OkHttp;
-import io.github.graphql.ServerConfig;
+import io.github.graphql.*;
 import io.github.graphql.deserializer.JavaDeserializerAdapter;
-import okhttp3.Response;
-import scala.Function1;
-import scala.Function4;
-import scala.Tuple4;
 
 import java.lang.reflect.*;
 import java.util.Arrays;

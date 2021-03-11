@@ -24,6 +24,7 @@ trait JavaDeserializer extends Deserializer {
   }
 
   protected def deserialize(isCollection: Boolean, data: AnyRef, entityClazzName: String): Any = {
+    if (data == null) return null
     if (isPrimitive(entityClazzName)) return data
     val result = new java.util.ArrayList[Any]()
     val targetClass = Class.forName(entityClazzName)
