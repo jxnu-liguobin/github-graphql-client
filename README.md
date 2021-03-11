@@ -1,7 +1,6 @@
 DOING
 
-GitHub graphql API of three languages contains Java, Kotlin, Scala, mainly for
-testing [graphql-java-codegen]( https://github.com/kobylynskyi/graphql-java-codegen).
+GitHub GraphQL client implement by proxy, mainly for testing [graphql-java-codegen](https://github.com/kobylynskyi/graphql-java-codegen). Support Java, Kotlin, Scala.
 
 [A Chinese SDK Example which does not use jdk proxy](https://github.com/growingio/growingio-graphql-javasdk)
 
