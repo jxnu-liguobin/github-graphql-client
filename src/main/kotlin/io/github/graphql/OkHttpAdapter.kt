@@ -31,18 +31,18 @@ object OkHttpAdapter {
 
     private fun buildClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .readTimeout(defaultTimeout, TimeUnit.MILLISECONDS)
-            .writeTimeout(defaultTimeout, TimeUnit.MILLISECONDS)
-            .connectTimeout(defaultTimeout, TimeUnit.MILLISECONDS)
-            .protocols(listOf(Protocol.HTTP_1_1, Protocol.HTTP_2))
-            .build()
+                .readTimeout(defaultTimeout, TimeUnit.MILLISECONDS)
+                .writeTimeout(defaultTimeout, TimeUnit.MILLISECONDS)
+                .connectTimeout(defaultTimeout, TimeUnit.MILLISECONDS)
+                .protocols(listOf(Protocol.HTTP_1_1, Protocol.HTTP_2))
+                .build()
     }
 
     private fun buildRequest(config: ServerConfigAdapter, request: GraphQLRequest): Request.Builder {
         val httpRequestBody = request.toHttpJsonBody()
         println("config: $config, graphql request body: $httpRequestBody")
         val rb = Request.Builder().url(config.serverHost).addHeader("Accept", ApplicationJson)
-            .post(httpRequestBody.toRequestBody(json))
+                .post(httpRequestBody.toRequestBody(json))
         config.headers.forEach {
             run {
                 rb.addHeader(it.key, it.value)
@@ -52,9 +52,8 @@ object OkHttpAdapter {
     }
 
     fun syncRunQuery(
-        config: ServerConfigAdapter,
-        request: GraphQLRequest,
-        entityClassName: String,
+            config: ServerConfigAdapter,
+            request: GraphQLRequest
     ): Any? {
         val rb = buildRequest(config, request)
         val response = client.newCall(rb.build()).execute()
@@ -63,13 +62,13 @@ object OkHttpAdapter {
             val dataJSON = jsonObject.getJSONObject("data")
             if (!dataJSON.isNull("errors")) {
                 throw ExecuteExceptionAdapter(
-                    "found errors in response: ",
-                    dataJSON.getJSONObject("errors").toString(),
-                    null
+                        "found errors in response: ",
+                        dataJSON.getJSONObject("errors").toString(),
+                        null
                 )
             } else {
                 val data = dataJSON.get(request.request.operationName)
-                return deserialized(data, entityClassName)
+                return deserialized(data)
             }
         } else {
             throw ExecuteExceptionAdapter("response is fail", response.body?.string(), null)
@@ -85,11 +84,10 @@ object OkHttpAdapter {
 }
 
 inline fun <reified Out> OkHttpAdapter.deserialized(
-    data: Any?,
-    entityClazzName: String,
+        data: Any?,
 ): Out? {
     if (data == null) return null
-    if (isPrimitive(entityClazzName)) return data as Out
+    if (isPrimitive(Out::class.java.simpleName)) return data as Out
     return JacksonAdapter.objectMapper.readValue<Out>(data.toString())
 }
 

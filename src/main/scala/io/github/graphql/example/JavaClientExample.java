@@ -17,7 +17,7 @@ public class JavaClientExample {
 
         QueryResolver queryResolver = GitHubJavaClient.newBuilder()
                 // 2. Set the service endpoint.
-                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer xx"), 3))
+                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer xx")))
                 .setProjection(userResponseProjection)
                 // 3. Set the request corresponding to the resolver.
                 .setRequest(UserQueryRequest.class)

@@ -1,10 +1,12 @@
 DOING
 
-GitHub GraphQL client implement by proxy, mainly for testing [graphql-java-codegen](https://github.com/kobylynskyi/graphql-java-codegen). Support Java, Kotlin, Scala.
+GitHub GraphQL client implement by proxy, mainly for
+testing [graphql-java-codegen](https://github.com/kobylynskyi/graphql-java-codegen). Support Java, Kotlin, Scala.
 
 [A Chinese SDK Example which does not use jdk proxy](https://github.com/growingio/growingio-graphql-javasdk)
 
-There are many classes in the three languages, which will lead to slow compilation and large memory requirement. Therefore, a single language should be used for testing, and you should enable parallel compilation.
+There are many classes in the three languages, which will lead to slow compilation and large memory requirement.
+Therefore, a single language should be used for testing, and you should enable parallel compilation.
 
 # Environment
 
@@ -15,14 +17,15 @@ There are many classes in the three languages, which will lead to slow compilati
 ## Source code description
 
 - `src/main/resources` It contains github graphql schema file and code generation configuration of the three languages.
-- `src/main/scala` It is mainly implemented by Scala, which provides Scala proxy client by Scala reflection and Java reflection, and Java proxy client by Java reflection. 
+- `src/main/scala` It is mainly implemented by Scala, which provides Scala proxy client by Scala reflection and Java
+  reflection, and Java proxy client by Java reflection.
 - `src/main/kotlin` It is implemented by Kotlin, which provides Kotlin proxy client by Java reflection.
 
 # Java
 
-
 1. Execute gradle task to generate Java codes `gradle graphqlCodegenJavaService`
 2. Use `GitHubJavaClient` to build resolver client.
+
 ```java
 public class JavaClientExample {
     public static void main(String[] args) throws Exception {
@@ -32,7 +35,7 @@ public class JavaClientExample {
 
         QueryResolver queryResolver = GitHubJavaClient.newBuilder()
                 // 2. Set the service endpoint.
-                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer xx"), 3))
+                .setConfig(ServerConfig.apply("https://api.github.com/graphql", Collections.singletonMap("Authorization", "Bearer xx")))
                 .setProjection(userResponseProjection)
                 // 3. Set the request corresponding to the resolver.
                 .setRequest(UserQueryRequest.class)
@@ -45,16 +48,18 @@ public class JavaClientExample {
     }
 }
 ```
+
 **Result**
+
 ```
 MDQ6VXNlcjI5NDk2ODcz
 ```
 
 # Scala
 
-
 1. Execute gradle task to generate Scala codes `gradle graphqlCodegenScalaService`
 2. Use `GitHubScalaClient` to build resolver client.
+
 ```scala
 
 object ScalaClientExample extends App {
@@ -81,16 +86,18 @@ object ScalaClientExample extends App {
 
 }
 ```
+
 **Result**
+
 ```
 {id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
 ```
 
 # Kotlin (Doesn't testing)
 
-
 1. Execute gradle task to generate Kotlin codes `gradle graphqlCodegenKotlinService`
 2. Use `GitHubKotlinClient` to build resolver client.
+
 ```kotlin
 object KotlinClientExample {
 
@@ -98,25 +105,27 @@ object KotlinClientExample {
     fun main(args: Array<String>) {
         val userResponseProjection = UserResponseProjection().id().avatarUrl().login().resourcePath()
         val queryResolver = GithubKotlinClient.newBuilder()
-            .setConfig(
-                ServerConfigAdapter(
-                    "https://api.github.com/graphql",
-                    mapOf(Pair("Authorization", "Bearer xx")),
-                    3
+                .setConfig(
+                        ServerConfigAdapter(
+                                "https://api.github.com/graphql",
+                                mapOf(Pair("Authorization", "Bearer xx"))
+                        )
                 )
-            )
-            .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
+                .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
 
         val userTO: UserTO? = queryResolver.user("jxnu-liguobin")
         println(userTO.toString())
     }
 }
 ```
+
 **Result**
-```
 
 ```
 
+```
 
-If there is a serialization error, it means that the Jackson configuration needs to be added. Please see [options](https://github.com/kobylynskyi/graphql-java-codegen/blob/develop/docs/codegen-options.md) and 
-[jackson example](https://github.com/kobylynskyi/graphql-java-codegen/blob/de7335adc28529055cadacdc38af99c19f3e4c55/plugins/gradle/example-client/build.gradle#L87).
+If there is a serialization error, it means that the Jackson configuration needs to be added. Please
+see [options](https://github.com/kobylynskyi/graphql-java-codegen/blob/develop/docs/codegen-options.md) and
+[jackson example](https://github.com/kobylynskyi/graphql-java-codegen/blob/de7335adc28529055cadacdc38af99c19f3e4c55/plugins/gradle/example-client/build.gradle#L87)
+.

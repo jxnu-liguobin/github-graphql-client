@@ -13,14 +13,13 @@ object KotlinClientExample {
     fun main(args: Array<String>) {
         val userResponseProjection = UserResponseProjection().id().avatarUrl().login().resourcePath()
         val queryResolver = GithubKotlinClient.newBuilder()
-            .setConfig(
-                ServerConfigAdapter(
-                    "https://api.github.com/graphql",
-                    mapOf(Pair("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b")),
-                    3
+                .setConfig(
+                        ServerConfigAdapter(
+                                "https://api.github.com/graphql",
+                                mapOf(Pair("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"))
+                        )
                 )
-            )
-            .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
+                .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
 
         val userTO: UserTO? = queryResolver.user("jxnu-liguobin")
         println(userTO.toString())
