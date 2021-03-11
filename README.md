@@ -84,7 +84,7 @@ object ScalaClientExample extends App {
 {id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
 ```
 
-# Kotlin Testing
+# Kotlin (Testing)
 
 
 1. Execute gradle task to generate Kotlin codes `gradle graphqlCodegenKotlinService`
@@ -97,16 +97,15 @@ object KotlinClientExample {
         val userResponseProjection = UserResponseProjection().id().avatarUrl().login().resourcePath()
         val queryResolver = GithubKotlinClient.newBuilder()
             .setConfig(
-                ServerConfig.apply(
+                ServerConfigAdapter(
                     "https://api.github.com/graphql",
-                    Collections.singletonMap("Authorization", "Bearer xx"),
+                    Collections.singletonMap("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"),
                     3
                 )
             )
             .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
 
         val userTO: UserTO? = queryResolver.user("jxnu-liguobin")
-
         println(userTO.toString())
     }
 }
