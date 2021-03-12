@@ -51,7 +51,7 @@ dependencies {
 /**
  * Generate apis and models in Kotlin
  */
-//compileKotlin.dependsOn "graphqlCodegenKotlinService"
+compileKotlin.dependsOn "graphqlCodegenKotlinService"
 task graphqlCodegenKotlinService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/kotlin-graphql")
@@ -61,7 +61,7 @@ task graphqlCodegenKotlinService(type: GraphQLCodegenGradleTask) {
 /**
  * Generate apis and models in scala
  */
-//compileScala.dependsOn "graphqlCodegenScalaService"
+compileScala.dependsOn "graphqlCodegenScalaService"
 task graphqlCodegenScalaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/scala-graphql")
@@ -71,7 +71,7 @@ task graphqlCodegenScalaService(type: GraphQLCodegenGradleTask) {
 /**
  * Generate apis and models in java
  */
-//compileJava.dependsOn "graphqlCodegenJavaService"
+compileJava.dependsOn "graphqlCodegenJavaService"
 task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/java-graphql")
