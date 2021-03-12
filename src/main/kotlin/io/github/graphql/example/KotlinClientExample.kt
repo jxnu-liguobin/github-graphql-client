@@ -2,26 +2,25 @@ package io.github.graphql.example
 
 import io.github.graphql.ServerConfigAdapter
 import io.github.graphql.client.GithubKotlinClient
-import io.github.graphql.k.model.UserQueryRequest
-import io.github.graphql.k.model.UserResponseProjection
-import io.github.graphql.k.model.UserTO
+import io.github.graphql.k.model.*
 import io.github.graphql.k.resolver.QueryResolver
 
 object KotlinClientExample {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val userResponseProjection = UserResponseProjection().id().avatarUrl().login().resourcePath()
+        // Since Kotlin has a mandatory non-null for fields, a field-less interface test is used here
+        val rateLimitResponseProjection = RateLimitResponseProjection().`all$`(1)
         val queryResolver = GithubKotlinClient.newBuilder()
-                .setConfig(
-                        ServerConfigAdapter(
-                                "https://api.github.com/graphql",
-                                mapOf(Pair("Authorization", "Bearer 5b64d19cff5d7eec10d99a9e4a3bf1bb0dc7491b"))
-                        )
+            .setConfig(
+                ServerConfigAdapter(
+                    "https://api.github.com/graphql",
+                    mapOf(Pair("Authorization", "Bearer 6c6e6f4c7b507b2cf6a9612762e9e35eb4195762"))
                 )
-                .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
+            )
+            .setProjection(rateLimitResponseProjection).build<QueryResolver, RateLimitQueryRequest>()
 
-        val userTO: UserTO? = queryResolver.user("jxnu-liguobin")
-        println(userTO.toString())
+        val rateLimit = queryResolver.rateLimit(true)
+        println(rateLimit.toString())
     }
 }

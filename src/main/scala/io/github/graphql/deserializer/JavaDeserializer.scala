@@ -7,15 +7,15 @@ import org.json.{ JSONArray, JSONObject }
 
 trait JavaDeserializer extends Deserializer {
 
-  def extractData(response: Response, isCollection: Boolean, request: GraphQLRequest, entityClassName: String): Any = {
+  def extractData(response: Response, request: GraphQLRequest, entityClass: Class[_]): Any = {
     if (response.isSuccessful) {
       val jsonObject = new JSONObject(response.body().string())
-      val dataJSON = jsonObject.getJSONObject("data")
-      if (!dataJSON.isNull("errors")) {
-        throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
+      if (!jsonObject.isNull("errors")) {
+        throw ExecuteException("found errors in response: ", jsonObject.get("errors").toString)
       } else {
+        val dataJSON = jsonObject.getJSONObject("data")
         val data = dataJSON.get(request.getRequest.getOperationName)
-        deserialize(isCollection, data, entityClassName)
+        deserialize(data, entityClass)
       }
     } else {
       throw ExecuteException("response is fail", response.body().string())
@@ -23,25 +23,25 @@ trait JavaDeserializer extends Deserializer {
 
   }
 
-  protected def deserialize(isCollection: Boolean, data: AnyRef, entityClazzName: String): Any = {
+  // TODO optimize it.
+  protected def deserialize(data: AnyRef, entityClass: Class[_]): Any = {
     if (data == null) return null
-    if (isPrimitive(entityClazzName)) return data
+    if (isPrimitive(entityClass)) return data
     val result = new java.util.ArrayList[Any]()
-    val targetClass = Class.forName(entityClazzName)
     try {
       data match {
-        case array: JSONArray if isCollection =>
+        case array: JSONArray =>
           for (i <- 0 until array.length()) {
-            val e = Jackson.objectMapper.readValue(array.get(i).asInstanceOf[JSONObject].toString, targetClass)
+            val e = Jackson.objectMapper.readValue(array.get(i).asInstanceOf[JSONObject].toString, entityClass)
             result.add(e)
           }
           result
         case _ =>
-          Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, targetClass)
+          Jackson.objectMapper.readValue(data.asInstanceOf[JSONObject].toString, entityClass)
       }
     } catch {
       case e: Exception =>
-        throw ExecuteException("deserialize data failed: ", e.getLocalizedMessage, e)
+        throw ExecuteException(s"deserialize data failed, class is ${entityClass.getTypeName}: ", e.getLocalizedMessage, e)
 
     }
   }

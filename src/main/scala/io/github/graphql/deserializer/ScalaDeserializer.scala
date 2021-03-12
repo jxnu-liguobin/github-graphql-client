@@ -8,7 +8,8 @@ import org.json.JSONObject
 trait ScalaDeserializer extends Deserializer {
 
   protected def deserialize[Out: Manifest](isCollection: Boolean, data: String): Any = {
-    if (isPrimitive(manifest[Out].runtimeClass.getSimpleName)) return data
+    if (data == null) return null
+    if (isPrimitive(manifest[Out].runtimeClass)) return data
     try {
       if (isCollection) Jackson.objectMapper.readValue[List[Out]](data)
       else Jackson.objectMapper.readValue[Out](data)
@@ -21,10 +22,10 @@ trait ScalaDeserializer extends Deserializer {
   def extractData[Out: Manifest](response: Response, isCollection: Boolean, request: GraphQLRequest): Any = {
     if (response.isSuccessful) {
       val jsonObject = new JSONObject(response.body().string())
-      val dataJSON = jsonObject.getJSONObject("data")
-      if (!dataJSON.isNull("errors")) {
-        throw ExecuteException("found errors in response: ", dataJSON.getJSONObject("errors").toString)
+      if (!jsonObject.isNull("errors")) {
+        throw ExecuteException("found errors in response: ", jsonObject.get("errors").toString)
       } else {
+        val dataJSON = jsonObject.getJSONObject("data")
         val data = dataJSON.get(request.getRequest.getOperationName)
         deserialize[Out](isCollection, data.toString)
       }

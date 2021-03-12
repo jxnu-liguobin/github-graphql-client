@@ -46,16 +46,21 @@ final public class JavaResolverProxy implements InvocationHandler, JavaDeseriali
     private Object proxyInvoke(Method method, Object[] args) {
         Field field = null;
         List<GraphQLResponseField> fields;
-        String entityClassName;
+        Class<?> entityClass;
         Type type = method.getGenericReturnType();
-        boolean isCollection = false;
         if (type instanceof ParameterizedType) {
-            isCollection = true;
             Type[] parameterizedType = ((ParameterizedType) type).getActualTypeArguments();
-            entityClassName = parameterizedType[0].getTypeName();
+            entityClass = (Class<?>) parameterizedType[0];
         } else {
-            entityClassName = type.getTypeName();
+            entityClass = (Class<?>)type;
         }
+
+        if (isPrimitive(entityClass)) {
+            assert(projection == null);
+        } else {
+            assert(projection != null);
+        }
+
         List<Parameter> parameters = Arrays.stream(method.getParameters()).collect(Collectors.toList());
 
         if (!parameters.isEmpty()) {
@@ -83,7 +88,7 @@ final public class JavaResolverProxy implements InvocationHandler, JavaDeseriali
 
         GraphQLRequest graphQLRequest = new GraphQLRequest(request, projection);
         Object ret;
-        ret = OkHttp.syncRunQuery(config, isCollection, graphQLRequest, entityClassName, buildFunction4());
+        ret = OkHttp.syncRunQuery(config, graphQLRequest, entityClass, buildFunction3());
         return ret;
     }
 

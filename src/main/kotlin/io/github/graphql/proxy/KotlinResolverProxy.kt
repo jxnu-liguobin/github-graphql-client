@@ -9,9 +9,9 @@ import java.lang.reflect.*
 import java.util.*
 
 internal class KotlinResolverProxy(
-        private val projection: GraphQLResponseProjection?,
-        private val config: ServerConfigAdapter,
-        request: Class<out GraphQLOperationRequest>,
+    private val projection: GraphQLResponseProjection?,
+    private val config: ServerConfigAdapter,
+    request: Class<out GraphQLOperationRequest>,
 ) : InvocationHandler {
 
     private val requestInstance = request.newInstance()
@@ -23,6 +23,17 @@ internal class KotlinResolverProxy(
 
     private fun proxyInvoke(method: Method, args: Array<out Any>?): Any? {
         val parameters = method.parameters.toList()
+        val type = method.genericReturnType
+        val entityClassName = if (type is ParameterizedType) {
+            val parameterizedType = type.actualTypeArguments
+            parameterizedType[0].typeName
+        } else {
+            type.typeName
+        }
+
+        assert(isPrimitive(entityClassName) && projection == null)
+        assert(!isPrimitive(entityClassName) && projection != null)
+
         fun <K, V> listToMap(keys: List<K>, values: List<V>): Map<K, V> {
             return keys.zip(values).toMap()
         }
@@ -41,10 +52,15 @@ internal class KotlinResolverProxy(
         if (projection != null) {
             val fields = getFieldsValue(projection)
             if (fields.isEmpty()) {
-                throw ExecuteExceptionAdapter("projection verification failed: ", "fields of projection cannot be empty", null)
+                throw ExecuteExceptionAdapter(
+                    "projection verification failed: ",
+                    "fields of projection cannot be empty",
+                    null
+                )
             }
         }
+
         val graphQLRequest = GraphQLRequest(requestInstance, projection)
-        return OkHttpAdapter.syncRunQuery(config, graphQLRequest)
+        return OkHttpAdapter.syncRunQuery(config, entityClassName, graphQLRequest)
     }
 }

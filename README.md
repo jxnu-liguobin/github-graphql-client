@@ -93,7 +93,7 @@ object ScalaClientExample extends App {
 {id: "MDQ6VXNlcjI5NDk2ODcz",isBountyHunter: false,isCampusExpert: false,isDeveloperProgramMember: false,isEmployee: false,isHireable: false,isSiteAdmin: false,isViewer: false,login: "jxnu-liguobin",pinnedItemsRemaining: 0,resourcePath: "/jxnu-liguobin",viewerCanChangePinnedItems: false,viewerCanCreateProjects: false,viewerCanFollow: false,viewerIsFollowing: false}
 ```
 
-# Kotlin (Doesn't testing)
+# Kotlin
 
 1. Execute gradle task to generate Kotlin codes `gradle graphqlCodegenKotlinService`
 2. Use `GitHubKotlinClient` to build resolver client.
@@ -101,28 +101,29 @@ object ScalaClientExample extends App {
 ```kotlin
 object KotlinClientExample {
 
-    @JvmStatic
-    fun main(args: Array<String>) {
-        val userResponseProjection = UserResponseProjection().id().avatarUrl().login().resourcePath()
-        val queryResolver = GithubKotlinClient.newBuilder()
-                .setConfig(
-                        ServerConfigAdapter(
-                                "https://api.github.com/graphql",
-                                mapOf(Pair("Authorization", "Bearer xx"))
-                        )
-                )
-                .setProjection(userResponseProjection).build<QueryResolver, UserQueryRequest>()
+  @JvmStatic
+  fun main(args: Array<String>) {
+    // Since Kotlin has a mandatory non-null for fields, a field-less interface test is used here.
+    val rateLimitResponseProjection = RateLimitResponseProjection().`all$`(1)
+    val queryResolver = GithubKotlinClient.newBuilder()
+      .setConfig(
+        ServerConfigAdapter(
+          "https://api.github.com/graphql",
+          mapOf(Pair("Authorization", "Bearer xx"))
+        )
+      )
+      .setProjection(rateLimitResponseProjection).build<QueryResolver, RateLimitQueryRequest>()
 
-        val userTO: UserTO? = queryResolver.user("jxnu-liguobin")
-        println(userTO.toString())
-    }
+    val rateLimit = queryResolver.rateLimit(true)
+    println(rateLimit.toString())
+  }
 }
 ```
 
 **Result**
 
 ```
-
+{ cost: 1, limit: 5000, nodeCount: 0, remaining: 4991, resetAt: "2021-03-12T03:44:44Z" }
 ```
 
 If there is a serialization error, it means that the Jackson configuration needs to be added. Please

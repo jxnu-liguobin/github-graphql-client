@@ -2,9 +2,9 @@ package io.github.graphql.deserializer
 
 trait Deserializer {
 
-  def isPrimitive(entityClazzName: String): Boolean = {
+  def isPrimitive(entityClass: Class[_]): Boolean = {
     val primitiveTypes = Seq("Int", "Boolean", "String", "Short", "Byte", "Long", "Char", "Float")
-    primitiveTypes.contains(entityClazzName)
+    primitiveTypes.contains(entityClass.getSimpleName)
   }
 
 }

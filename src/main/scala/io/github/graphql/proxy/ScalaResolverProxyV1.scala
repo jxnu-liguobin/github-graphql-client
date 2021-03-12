@@ -27,17 +27,20 @@ final class ScalaResolverProxyV1[Request <: GraphQLOperationRequest : Manifest] 
     }
 
   private def proxyInvoke(method: Method, args: Array[AnyRef]): Any = {
-    var field: Field = null
-    var fields: util.List[GraphQLResponseField] = null
     val `type` = method.getGenericReturnType
-    var isCollection = false
-    val entityClassName = `type` match {
+    val entityClass = `type` match {
       case parameterizedType1: ParameterizedType =>
-        isCollection = true
         val parameterizedType = parameterizedType1.getActualTypeArguments
-        parameterizedType(0).getTypeName
-      case _ => `type`.getTypeName
+        parameterizedType(0).asInstanceOf[Class[_]]
+      case _ => `type`.asInstanceOf[Class[_]]
     }
+
+    if (isPrimitive(entityClass)) {
+      assert(projection == null)
+    } else {
+      assert(projection != null)
+    }
+
     val parameters = method.getParameters.toList
     if (parameters.nonEmpty) {
       val parameterNames = parameters.map(_.getName)
@@ -45,6 +48,8 @@ final class ScalaResolverProxyV1[Request <: GraphQLOperationRequest : Manifest] 
       request.getInput.putAll(CollectionUtils.listToMap(parameterNames, arguments))
     }
     // TODO remove reflect
+    var field: Field = null
+    var fields: util.List[GraphQLResponseField] = null
     try {
       field = projection.getClass.getSuperclass.getDeclaredField("fields")
       field.setAccessible(true)
@@ -59,7 +64,7 @@ final class ScalaResolverProxyV1[Request <: GraphQLOperationRequest : Manifest] 
     }
 
     val graphQLRequest = new GraphQLRequest(request, projection)
-    OkHttp.syncRunQuery(config, isCollection, graphQLRequest, entityClassName)(extractData)
+    OkHttp.syncRunQuery(config, graphQLRequest, entityClass)(extractData)
   }
 
 }

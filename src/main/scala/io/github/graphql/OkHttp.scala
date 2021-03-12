@@ -33,11 +33,11 @@ object OkHttp {
     rb
   }
 
-  def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest, entityClassName: String)
-    (fun: (Response, Boolean, GraphQLRequest, String) => Any): Any = {
+  def syncRunQuery(config: ServerConfig, request: GraphQLRequest, entityClass: Class[_])
+    (fun: (Response, GraphQLRequest, Class[_]) => Any): Any = {
     val rb = buildRequest(config, request)
     val response = OkHttp.client.newCall(rb.build()).execute()
-    fun(response, isCollection, request, entityClassName)
+    fun(response, request, entityClass)
   }
 
   def syncRunQuery(config: ServerConfig, isCollection: Boolean, request: GraphQLRequest)

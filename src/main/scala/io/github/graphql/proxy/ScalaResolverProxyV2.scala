@@ -39,6 +39,13 @@ final class ScalaResolverProxyV2[Request <: GraphQLOperationRequest : Manifest, 
       case _: ParameterizedType => true
       case _ => false
     }
+
+    if (isPrimitive(manifest[Out].runtimeClass)) {
+      assert(projection == null)
+    } else {
+      assert(projection != null)
+    }
+
     val parameters = method.getParameters.toList
     if (parameters.nonEmpty) {
       val parameterNames = parameters.map(_.getName)
