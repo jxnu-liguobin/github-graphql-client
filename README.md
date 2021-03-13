@@ -1,4 +1,6 @@
-DOING
+# GitHub GraphQL client
+
+[![Scala CI](https://github.com/jxnu-liguobin/github-graphql-client/actions/workflows/scala.yml/badge.svg)](https://github.com/jxnu-liguobin/github-graphql-client/actions/workflows/scala.yml)
 
 GitHub GraphQL client implement by proxy, mainly for
 testing [graphql-java-codegen](https://github.com/kobylynskyi/graphql-java-codegen). Support Java, Kotlin, Scala.
