@@ -27,7 +27,7 @@ allprojects {
 }
 
 dependencies {
-    implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.5-SNAPSHOT"
+    implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.5"
     implementation "javax.validation:validation-api:2.0.1.Final"
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
     implementation "org.json:json:20201115"
