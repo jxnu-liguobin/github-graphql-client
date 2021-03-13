@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'scala'
     id "org.jetbrains.kotlin.jvm" version "1.4.0"
-    id "io.github.kobylynskyi.graphql.codegen" version "4.1.5-SNAPSHOT"
+    id "io.github.kobylynskyi.graphql.codegen" version "4.1.5"
 }
 
 group 'io.github.jxnu-liguobin'

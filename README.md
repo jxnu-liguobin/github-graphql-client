@@ -13,6 +13,7 @@ Therefore, a single language should be used for testing, and you should enable p
 - Java 1.8
 - Scala 2.13.5
 - Kotlin 1.4.0
+- graphql-java-codegen 4.1.5
 
 ## Source code description
 
