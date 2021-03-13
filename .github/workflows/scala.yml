@@ -17,7 +17,5 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build Scala & Java
-      run: gradle compileScala --daemon --parallel
-    - name: Build Kotlin
-      run: gradle compileKotlin --daemon --parallel -DXmx=8096m
+    - name: Build Scala & Java & Kotlin
+      run: gradle compileScala --daemon --parallel DXmx=8096m
