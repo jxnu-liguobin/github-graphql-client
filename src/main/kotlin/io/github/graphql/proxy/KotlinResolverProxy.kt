@@ -31,8 +31,11 @@ internal class KotlinResolverProxy(
             type.typeName
         }
 
-        assert(isPrimitive(entityClassName) && projection == null)
-        assert(!isPrimitive(entityClassName) && projection != null)
+        if (isPrimitive(entityClassName)) {
+            assert(projection == null)
+        } else {
+            assert(projection != null)
+        }
 
         fun <K, V> listToMap(keys: List<K>, values: List<V>): Map<K, V> {
             return keys.zip(values).toMap()
