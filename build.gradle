@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'scala'
     id "org.jetbrains.kotlin.jvm" version "1.4.0"
-    id "io.github.kobylynskyi.graphql.codegen" version "4.1.5"
+    id "io.github.kobylynskyi.graphql.codegen" version "4.1.6"
 }
 
 group 'io.github.jxnu-liguobin'
@@ -26,7 +26,7 @@ allprojects {
 }
 
 dependencies {
-    implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.5"
+    implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.6"
     implementation "javax.validation:validation-api:2.0.1.Final"
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
     implementation "org.json:json:20201115"
