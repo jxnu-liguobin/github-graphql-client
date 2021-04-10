@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'scala'
     id "org.jetbrains.kotlin.jvm" version "1.4.0"
-    id "io.github.kobylynskyi.graphql.codegen" version "4.1.6"
+    id "io.github.kobylynskyi.graphql.codegen" version "5.0.1-SNAPSHOT"
 }
 
 group 'io.github.jxnu-liguobin'
@@ -26,7 +26,7 @@ allprojects {
 }
 
 dependencies {
-    implementation "io.github.kobylynskyi:graphql-java-codegen:4.1.6"
+    implementation "io.github.kobylynskyi:graphql-java-codegen:5.0.1-SNAPSHOT"
     implementation "javax.validation:validation-api:2.0.1.Final"
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
     implementation "org.json:json:20201115"
@@ -54,7 +54,7 @@ compileKotlin.dependsOn "graphqlCodegenKotlinService"
 task graphqlCodegenKotlinService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/kotlin-graphql")
-    jsonConfigurationFile = "src/main/resources/kotlin-codegen-config.json"
+    configurationFiles = ["src/main/resources/kotlin-codegen-config.conf"]
 }
 
 /**
@@ -64,7 +64,7 @@ compileScala.dependsOn "graphqlCodegenScalaService"
 task graphqlCodegenScalaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/scala-graphql")
-    jsonConfigurationFile = "src/main/resources/scala-codegen-config.json"
+    configurationFiles = ["src/main/resources/scala-codegen-config.conf"]
 }
 
 /**
@@ -74,7 +74,7 @@ compileJava.dependsOn "graphqlCodegenJavaService"
 task graphqlCodegenJavaService(type: GraphQLCodegenGradleTask) {
     graphqlSchemas.includePattern = "schema\\.graphqls"
     outputDir = new File("$buildDir/java-graphql")
-    jsonConfigurationFile = "src/main/resources/java-codegen-config.json"
+    configurationFiles = ["src/main/resources/java-codegen-config.conf"]
 }
 
 tasks.withType(JavaCompile).configureEach {
